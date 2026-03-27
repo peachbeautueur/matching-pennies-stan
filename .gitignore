@@ -1,0 +1,6 @@
+scripts/__pycache__/
+*.pyc
+
+stan/*.exe
+
+data/recovery/sim_T*.json
