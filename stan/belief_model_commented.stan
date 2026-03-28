@@ -1,56 +1,68 @@
 data {
-  int<lower=1> T;                       // Number of trials in the observed sequence.
+  int<lower=1> T;                       // Number of trials.
   array[T] int<lower=0, upper=1> y;     // Agent choices: 1 = Heads, 0 = Tails.
-  array[T] int<lower=0, upper=1> opp;   // Opponent choices: 1 = Heads, 0 = Tails.
+  array[T] int<lower=0, upper=1> opp;   // Opponent choices on each trial.
 }
 
 parameters {
-  real<lower=0, upper=1> alpha;         // Learning rate for belief updating.
-  real<lower=0> beta;                   // Inverse temperature for softmax choice.
+  real<lower=0, upper=1> alpha;
+  real<lower=0> beta;
 }
 
 model {
-  real p;                               // Current belief that opponent will choose Heads.
-  real vH;                              // Subjective value of choosing Heads.
-  real vT;                              // Subjective value of choosing Tails.
-  real p_choose_H;                      // Choice probability of Heads after softmax.
+  real p;
+  real vH;
+  real vT;
+  real p_choose_H;
 
-  alpha ~ beta(2, 2);                   // Prior favoring interior learning-rate values.
-  beta ~ lognormal(0, 1);               // Positive prior for choice sensitivity.
+  // Priors regularize learning and choice consistency while remaining flexible.
+  alpha ~ beta(2, 2);
+  beta ~ lognormal(0, 1);
 
-  p = 0.5;                              // Initial belief: opponent is equally likely to play H/T.
+  // The model starts from an unbiased belief: the opponent is equally likely
+  // to choose Heads or Tails before any evidence has been observed.
+  p = 0.5;
 
   for (t in 1:T) {
-    vH = 2 * p - 1;                     // Expected payoff of Heads in matching pennies.
-    vT = 1 - 2 * p;                     // Expected payoff of Tails.
+    // In matching pennies, the value of each action depends on the current
+    // belief about what the opponent will do next.
+    vH = 2 * p - 1;
+    vT = 1 - 2 * p;
 
-    p_choose_H = inv_logit(beta * (vH - vT));  // Softmax on the value difference.
+    // The value difference is mapped to a stochastic choice probability.
+    // Higher beta makes choices more deterministic.
+    p_choose_H = inv_logit(beta * (vH - vT));
 
-    y[t] ~ bernoulli(p_choose_H);       // Likelihood for the observed choice.
+    // Observed choice likelihood.
+    y[t] ~ bernoulli(p_choose_H);
 
-    p = p + alpha * (opp[t] - p);       // Delta-rule update after observing the opponent.
+    // Delta rule update: the new belief moves part of the way from the old
+    // belief toward the opponent's observed action.
+    p = p + alpha * (opp[t] - p);
   }
 }
 
 generated quantities {
-  array[T] int y_rep;                   // Posterior predictive replicated choices.
-  real log_lik;                         // Pointwise log-likelihood summed over trials.
-  real p;                               // Re-created latent belief for posterior simulation.
-  real vH;                              // Re-created value of Heads.
-  real vT;                              // Re-created value of Tails.
-  real p_choose_H;                      // Re-created choice probability for Heads.
+  array[T] int y_rep;
+  real log_lik;
+  real p;
+  real vH;
+  real vT;
+  real p_choose_H;
 
-  log_lik = 0;                          // Initialize the accumulated log-likelihood.
-  p = 0.5;                              // Use the same initial condition as in the model block.
+  // Rebuild the latent belief trajectory so that we can generate posterior
+  // predictive choices and compute the overall log likelihood.
+  log_lik = 0;
+  p = 0.5;
 
   for (t in 1:T) {
-    vH = 2 * p - 1;                     // Recompute trial-wise action value of Heads.
-    vT = 1 - 2 * p;                     // Recompute trial-wise action value of Tails.
-    p_choose_H = inv_logit(beta * (vH - vT));  // Recompute trial-wise choice probability.
+    vH = 2 * p - 1;
+    vT = 1 - 2 * p;
+    p_choose_H = inv_logit(beta * (vH - vT));
 
-    y_rep[t] = bernoulli_rng(p_choose_H);      // Simulate a replicated choice.
-    log_lik += bernoulli_lpmf(y[t] | p_choose_H);  // Add this trial's log-likelihood.
+    y_rep[t] = bernoulli_rng(p_choose_H);
+    log_lik += bernoulli_lpmf(y[t] | p_choose_H);
 
-    p = p + alpha * (opp[t] - p);       // Advance the latent belief to the next trial.
+    p = p + alpha * (opp[t] - p);
   }
 }

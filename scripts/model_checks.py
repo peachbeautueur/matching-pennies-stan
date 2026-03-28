@@ -99,7 +99,7 @@ def save_check_plots(prior_choice, prior_switch, post_pred, prior_post):
     fig, axes = plt.subplots(1, 2, figsize=(10, 4))
     axes[0].hist(prior_choice, bins=25, color="#6baed6", alpha=0.8)
     axes[0].set_title("Prior Predictive Choice Rate")
-    axes[0].set_xlabel("Mean P(choose Heads)")
+    axes[0].set_xlabel("Mean choice rate for Heads")
     axes[0].set_ylabel("Count")
 
     axes[1].hist(prior_switch, bins=25, color="#9ecae1", alpha=0.8)
@@ -135,12 +135,14 @@ def save_check_plots(prior_choice, prior_switch, post_pred, prior_post):
     axes[0].hist(prior_post["alpha_post"], bins=30, alpha=0.6, label="Posterior", color="#08519c")
     axes[0].set_title("Alpha Prior vs Posterior")
     axes[0].set_xlabel("alpha")
+    axes[0].set_ylabel("Count")
     axes[0].legend()
 
     axes[1].hist(prior_post["beta_prior"], bins=30, alpha=0.6, label="Prior", color="#a1d99b")
     axes[1].hist(prior_post["beta_post"], bins=30, alpha=0.6, label="Posterior", color="#006d2c")
     axes[1].set_title("Beta Prior vs Posterior")
     axes[1].set_xlabel("beta")
+    axes[1].set_ylabel("Count")
     axes[1].legend()
 
     fig.tight_layout()
