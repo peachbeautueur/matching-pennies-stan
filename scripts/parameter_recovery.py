@@ -185,6 +185,28 @@ def save_recovery_plots(results, summary):
     if len(trial_counts) == 1:
         axes = [axes]
 
+    alpha_lims = [0, 1]
+    for ax, trial_count in zip(axes, trial_counts):
+        rows_at_t = [row for row in results if int(row["T"]) == trial_count]
+        alpha_true_t = np.asarray([row["alpha_true"] for row in rows_at_t], dtype=float)
+        alpha_hat_t = np.asarray([row["alpha_hat"] for row in rows_at_t], dtype=float)
+        ax.scatter(alpha_true_t, alpha_hat_t, alpha=0.75, color="#3182bd")
+        ax.plot(alpha_lims, alpha_lims, linestyle="--", color="black")
+        ax.set_title(f"T = {trial_count}")
+        ax.set_xlabel("True alpha")
+        ax.set_xlim(alpha_lims)
+        ax.set_ylim(alpha_lims)
+
+    axes[0].set_ylabel("Recovered alpha")
+    fig.suptitle("Alpha Recovery by Trial Count", y=0.98)
+    fig.tight_layout(rect=[0, 0, 1, 0.93])
+    fig.savefig(FIG_DIR / "figure_8_alpha_recovery_by_trials.png", dpi=150)
+    plt.close(fig)
+
+    fig, axes = plt.subplots(1, len(trial_counts), figsize=(4 * len(trial_counts), 4), sharex=True, sharey=True)
+    if len(trial_counts) == 1:
+        axes = [axes]
+
     beta_lims = [0, max(beta_true.max(), beta_hat.max())]
     for ax, trial_count in zip(axes, trial_counts):
         rows_at_t = [row for row in results if int(row["T"]) == trial_count]
@@ -208,7 +230,7 @@ def main():
     results = run_recovery()
     summary = summarize_recovery(results)
     save_recovery_plots(results, summary)
-    print("Saved figures 4-7 and recovery tables to data/recovery and figures/.")
+    print("Saved figures 4-8 and recovery tables to data/recovery and figures/.")
 
 
 if __name__ == "__main__":
