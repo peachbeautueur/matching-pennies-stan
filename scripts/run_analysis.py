@@ -41,7 +41,7 @@ def main():
     summary = summarize_recovery(results)
     save_recovery_plots(results, summary)
 
-    print("Saved assignment figures 1-6 to figures/.")
+    print("Saved assignment figures 1-7, including figure 2b, to figures/.")
 
 
 if __name__ == "__main__":

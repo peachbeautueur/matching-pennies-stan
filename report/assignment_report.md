@@ -83,15 +83,21 @@ Figure 2 presents the posterior predictive checks.
 
 In both panels, the observed statistic falls within the main body of the posterior predictive distribution. This indicates that the model captures these coarse behavioural summaries adequately. Although this does not prove that the model is correct in every respect, it does suggest that the model is not grossly inconsistent with the data it was fitted to.
 
+To provide a clearer overview, prior predictive and posterior predictive distributions were also overlaid in a single figure.
+
+![Figure 2b. Prior predictive and posterior predictive distributions overlaid with the observed statistic marked by a dashed line.](../figures/figure_2b_predictive_check_overlay.png)
+
+The overlay shows that the posterior predictive distributions are narrower and more closely centered on the observed summaries than the prior predictive distributions. This is the expected pattern if the data are informative: before fitting, the model allows a broader range of plausible behaviour, whereas after fitting, predictive mass shifts toward the statistics actually observed in the dataset.
+
 ### 5.3 Prior Posterior Update Checks
 
 Prior-posterior comparisons were used to examine whether the data meaningfully updated beliefs about the model parameters. If the posterior remained nearly identical to the prior, that would indicate that the data were weakly informative or that the model was poorly identified.
 
-Figure 3 compares the prior and posterior distributions of the two parameters.
+Figure 3 compares the prior and posterior distributions of the two parameters using density-normalized histograms, with the true generating value overlaid in each panel.
 
 ![Figure 3. Prior posterior comparison for alpha and beta.](../figures/figure_3_prior_posterior_update.png)
 
-For `alpha`, the posterior is substantially narrower than the prior and is concentrated around a moderate learning-rate region. For `beta`, the posterior is also more concentrated than the prior, although it remains more skewed and diffuse than the posterior for `alpha`. Overall, the figure suggests that the data do inform both parameters, but that `beta` is estimated with less precision.
+For `alpha`, the posterior is substantially narrower than the prior and is concentrated close to the true generating value of `0.3`. For `beta`, the posterior is also more concentrated than the prior and is centered in the region of the true value `3.0`, although it remains more skewed and diffuse than the posterior for `alpha`. Presenting the comparison on a density scale is especially important for `beta`, because the prior is right skewed and would otherwise dominate the figure visually through raw count differences alone. Overall, the figure suggests that the data do inform both parameters, but that `beta` is estimated with less precision.
 
 ## 6. Parameter Recovery
 
@@ -126,6 +132,12 @@ Figure 6 summarizes how recovery error changes as trial count increases.
 ![Figure 6. Mean absolute recovery error as a function of trial count for alpha and beta.](../figures/figure_6_recovery_error_by_trials.png)
 
 For `alpha`, the reduction in error is close to monotonic. For `beta`, the decline is less regular, but the best recovery is still obtained at the longest trial count tested.
+
+To assess bias more directly, beta recovery can also be inspected separately for each trial count.
+
+![Figure 7. Beta recovery shown separately for each trial count. The dashed line indicates perfect recovery.](../figures/figure_7_beta_recovery_by_trials.png)
+
+This figure shows more clearly what is hidden by the pooled scatter and the mean absolute error summary alone. At `T = 50`, the recovered beta values are relatively dispersed around the identity line, indicating unstable estimation. As trial count increases, the points become more tightly aligned with the identity line, although the higher beta conditions still show more spread than the lower beta conditions. This confirms that longer sequences improve beta recovery not only in average error but also in bias structure.
 
 Taken together, these results suggest that the model recovers `alpha` reasonably well and `beta` only moderately well. A cautious conclusion is that `T = 50` is too short for stable recovery, `T = 100` may be usable but remains noisy, and `T >= 200` is a more defensible lower bound for reliable parameter estimation in this model. Among the tested conditions, `T = 400` produces the strongest recovery overall.
 

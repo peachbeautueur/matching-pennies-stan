@@ -180,12 +180,35 @@ def save_recovery_plots(results, summary):
     fig.savefig(FIG_DIR / "figure_6_recovery_error_by_trials.png", dpi=150)
     plt.close(fig)
 
+    trial_counts = sorted({int(row["T"]) for row in results})
+    fig, axes = plt.subplots(1, len(trial_counts), figsize=(4 * len(trial_counts), 4), sharex=True, sharey=True)
+    if len(trial_counts) == 1:
+        axes = [axes]
+
+    beta_lims = [0, max(beta_true.max(), beta_hat.max())]
+    for ax, trial_count in zip(axes, trial_counts):
+        rows_at_t = [row for row in results if int(row["T"]) == trial_count]
+        beta_true_t = np.asarray([row["beta_true"] for row in rows_at_t], dtype=float)
+        beta_hat_t = np.asarray([row["beta_hat"] for row in rows_at_t], dtype=float)
+        ax.scatter(beta_true_t, beta_hat_t, alpha=0.75, color="#2ca25f")
+        ax.plot(beta_lims, beta_lims, linestyle="--", color="black")
+        ax.set_title(f"T = {trial_count}")
+        ax.set_xlabel("True beta")
+        ax.set_xlim(beta_lims)
+        ax.set_ylim(beta_lims)
+
+    axes[0].set_ylabel("Recovered beta")
+    fig.suptitle("Beta Recovery by Trial Count", y=0.98)
+    fig.tight_layout(rect=[0, 0, 1, 0.93])
+    fig.savefig(FIG_DIR / "figure_7_beta_recovery_by_trials.png", dpi=150)
+    plt.close(fig)
+
 
 def main():
     results = run_recovery()
     summary = summarize_recovery(results)
     save_recovery_plots(results, summary)
-    print("Saved figures 4-6 and recovery tables to data/recovery and figures/.")
+    print("Saved figures 4-7 and recovery tables to data/recovery and figures/.")
 
 
 if __name__ == "__main__":

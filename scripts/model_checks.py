@@ -131,18 +131,85 @@ def save_check_plots(prior_choice, prior_switch, post_pred, prior_post):
     plt.close(fig)
 
     fig, axes = plt.subplots(1, 2, figsize=(10, 4))
-    axes[0].hist(prior_post["alpha_prior"], bins=30, alpha=0.6, label="Prior", color="#9ecae1")
-    axes[0].hist(prior_post["alpha_post"], bins=30, alpha=0.6, label="Posterior", color="#08519c")
-    axes[0].set_title("Alpha Prior vs Posterior")
-    axes[0].set_xlabel("alpha")
-    axes[0].set_ylabel("Count")
+    axes[0].hist(prior_choice, bins=25, density=True, color="#9ecae1", alpha=0.65, label="Prior predictive")
+    axes[0].hist(
+        post_pred["pp_choice_rate"],
+        bins=25,
+        density=True,
+        color="#a1d99b",
+        alpha=0.65,
+        label="Posterior predictive",
+    )
+    axes[0].axvline(post_pred["obs_choice_rate"], color="black", linestyle="--", label="Observed")
+    axes[0].set_title("Predictive Check Overlay: Choice Rate")
+    axes[0].set_xlabel("Mean choice rate")
+    axes[0].set_ylabel("Density")
     axes[0].legend()
 
-    axes[1].hist(prior_post["beta_prior"], bins=30, alpha=0.6, label="Prior", color="#a1d99b")
-    axes[1].hist(prior_post["beta_post"], bins=30, alpha=0.6, label="Posterior", color="#006d2c")
+    axes[1].hist(prior_switch, bins=25, density=True, color="#9ecae1", alpha=0.65, label="Prior predictive")
+    axes[1].hist(
+        post_pred["pp_switch_rate"],
+        bins=25,
+        density=True,
+        color="#a1d99b",
+        alpha=0.65,
+        label="Posterior predictive",
+    )
+    axes[1].axvline(post_pred["obs_switch_rate"], color="black", linestyle="--", label="Observed")
+    axes[1].set_title("Predictive Check Overlay: Switch Rate")
+    axes[1].set_xlabel("Switch rate")
+    axes[1].set_ylabel("Density")
+    axes[1].legend()
+
+    fig.tight_layout()
+    fig.savefig(FIG_DIR / "figure_2b_predictive_check_overlay.png", dpi=150)
+    plt.close(fig)
+
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4))
+    axes[0].hist(
+        prior_post["alpha_prior"],
+        bins=30,
+        density=True,
+        alpha=0.6,
+        label="Prior",
+        color="#9ecae1",
+    )
+    axes[0].hist(
+        prior_post["alpha_post"],
+        bins=30,
+        density=True,
+        alpha=0.6,
+        label="Posterior",
+        color="#08519c",
+    )
+    axes[0].axvline(0.3, color="black", linestyle="--", label="True value")
+    axes[0].set_title("Alpha Prior vs Posterior")
+    axes[0].set_xlabel("alpha")
+    axes[0].set_ylabel("Density")
+    axes[0].legend()
+
+    beta_bins = np.linspace(0, 8, 31)
+    axes[1].hist(
+        prior_post["beta_prior"],
+        bins=beta_bins,
+        density=True,
+        alpha=0.6,
+        label="Prior",
+        color="#a1d99b",
+    )
+    axes[1].hist(
+        prior_post["beta_post"],
+        bins=beta_bins,
+        density=True,
+        alpha=0.6,
+        label="Posterior",
+        color="#006d2c",
+    )
+    axes[1].axvline(3.0, color="black", linestyle="--", label="True value")
     axes[1].set_title("Beta Prior vs Posterior")
     axes[1].set_xlabel("beta")
-    axes[1].set_ylabel("Count")
+    axes[1].set_ylabel("Density")
+    axes[1].set_xlim(0, 8)
     axes[1].legend()
 
     fig.tight_layout()
@@ -160,7 +227,7 @@ def main():
     prior_post = prior_posterior_update_summary(fit)
 
     save_check_plots(prior_choice, prior_switch, post_pred, prior_post)
-    print("Saved figures 1-3 to figures/.")
+    print("Saved figures 1, 2, 2b, and 3 to figures/.")
 
 
 if __name__ == "__main__":
